@@ -1,0 +1,20 @@
+common: &default
+    docusign:
+        username: <%=ENV['DOCUSIGN_USERNAME']%>
+        password: <%=ENV['DOCUSIGN_PASSWORD']%>
+        key: <%=ENV['DOCUSIGN_KEY']%>
+        login_url: https://demo.docusign.net/restapi/v2/login_information?api_password=true&include_account_id_guid=true&login_settings=all
+        return_url: http://localhost:3000/demos/docusign/embedded-signing/finish
+        templateId:  9CDC39E6-E47D-42E4-B3C0-47C4346BAEDF
+        templateRoleName: Approver
+        recipientName: Nate Slater
+        recipientEmail: nslater@genomichealth.com
+
+development:
+    <<: *default
+
+test:
+    <<: *default
+
+production:
+    <<: *default
