@@ -1,8 +1,9 @@
-== DocuSign Demo Application
+== Integration Demos Application
 
-This application shows how to use the DocuSign API's to integrate DocuSign into your own web applications.  Integrations with the following
-other services will be shown:
+This application consists of a collection of small demos illustrating how to integrate your app with several cloud-based services.  Demos of the following services will be included:
 
-* Salesforce.com
+* Docusign
 * Box
+* Google Drive
+* SalesForce.com
 
