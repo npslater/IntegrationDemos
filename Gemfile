@@ -4,12 +4,12 @@ gem 'rails', '3.2.3'
 gem 'rack-oauth2', '1.0.5'
 gem 'bootstrap-sass', '2.0.0'
 gem 'rest-client', '>=1.6.7'
+gem 'sqlite3', '1.3.5'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 group :development, :test do
-	gem 'sqlite3', '1.3.5'
 	gem 'rspec-rails', '2.9.0'
 	gem 'guard-rspec', '0.5.5'
 end
