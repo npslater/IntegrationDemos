@@ -7,8 +7,22 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
-
-<%= yield %>
-
+<header class="navbar navbar-fixed-top"> 
+    <div class="navbar-inner"> 
+    <div class="container"> 
+      <%= link_to "Integration Demos", '#', id: "logo" %> 
+      <nav> 
+        <ul class="nav pull-right"> 
+          <li> <%= link_to "Home",    '/' %> </li>
+          <li> <%= link_to "Source Code",    'https://github.com/npslater/IntegrationDemos.git' %> </li>
+        </ul> 
+      </nav> 
+    </div> 
+    </div> 
+</header> 
+<div class="container"> 
+    <%= yield %> 
+    <%= debug(params) if Rails.env.development? %> 
+</div> 
 </body>
 </html>

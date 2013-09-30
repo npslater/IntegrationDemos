@@ -7,8 +7,8 @@ common: &default
         return_url: http://localhost:3000/demos/docusign/embedded-signing/finish
         templateId:  9CDC39E6-E47D-42E4-B3C0-47C4346BAEDF
         templateRoleName: Approver
-        recipientName: Nate Slater
-        recipientEmail: nslater@genomichealth.com
+        recipientName: John Smith
+        recipientEmail: jsmith@smith.com
 
 development:
     <<: *default

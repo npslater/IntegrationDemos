@@ -1,0 +1,36 @@
+<% provide(:title, 'Create Embedded Sign Request') %>
+<div class="row">
+    <div class="span6">
+        <h2>Create an Embedded Sign Request</h2>
+    </div>
+</div>
+<% @request.errors.messages.each do |message| %>
+<div class="row">
+    <div class="span6">
+        <div class="alert alert-error"><%= message[1]%></div>
+    </div>
+</div>
+<% end %>
+<div class="row">
+    <div class="span6">
+        <form class="form-horizontal" id="newRequestForm" method="post" action="/demos/docusign/embedded-signing/create">
+          <div class="control-group">
+            <label class="control-label" for="inputName">Name</label>
+            <div class="controls">
+              <input type="text" id="inputName" placeholder="Name" name="name" value="<%=@request.name%>">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="inputEmail">Email</label>
+            <div class="controls">
+              <input type="text" id="inputEmail" placeholder="Email" name="email" value="<%=@request.email%>">
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="controls">
+              <button type="submit" class="btn">Create Request</button>
+            </div>
+          </div>
+        </form>
+    </div>
+</div>

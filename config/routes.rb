@@ -2,8 +2,11 @@ DocuSignDemo::Application.routes.draw do
 
   root :to => 'static_pages#index'
   
+  match 'demos/docusign/embedded-signing/new', :to => 'embedded_sign_request#new'
+  match 'demos/docusign/embedded-signing/create', :to => 'embedded_sign_request#create' 
+
   match 'demos/docusign/embedded-signing', :to => 'sign_document#embeddedSigning'
-  match 'demos/docusign/embedded-signing/finish', :to => 'sign_document#finish'
+  match 'demos/docusign/embedded-signing/finish', :to => 'embedded_sign_request#finish'
 
   get '/static_pages/index'
 

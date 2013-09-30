@@ -72,6 +72,7 @@ class DocuSignClient
                 if response.code == 201
                     return JSON.parse(response.body)
                 else
+                    puts "ERROR: #{response.body}"
                     raise "HTTP Error: #{response.code}"
                 end
             end 
