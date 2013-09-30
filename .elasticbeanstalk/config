@@ -1,0 +1,13 @@
+[global]
+ApplicationName=IntegrationDemos
+AwsCredentialFile=C:\Users\nslater\.elasticbeanstalk\aws_credential_file
+DevToolsEndpoint=git.elasticbeanstalk.us-west-1.amazonaws.com
+EnvironmentName=IntegrationDemos-env
+EnvironmentType=SingleInstance
+InstanceProfileName=aws-elasticbeanstalk-ec2-role
+OptionSettingFile=C:\src\personal\ruby\IntegrationDemos\.elasticbeanstalk\optionsettings.IntegrationDemos-env
+RdsEnabled=No
+Region=us-west-1
+ServiceEndpoint=https://elasticbeanstalk.us-west-1.amazonaws.com
+SolutionStack=32bit Amazon Linux running Ruby 1.9.3
+

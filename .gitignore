@@ -19,3 +19,5 @@
 .DS_Store
 bundler_stubs/
 setenv.*
+
+.elasticbeanstalk/
