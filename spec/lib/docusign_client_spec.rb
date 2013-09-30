@@ -73,7 +73,7 @@ describe DocuSignClient do |variable|
     }
 
 	it "should have a constructor that takes a hash of credentials and returns an instance" do
-		#puts "config: #{AppConfig.docusign}"
+		puts "config: #{AppConfig.docusign}"
 		client.should be_an_instance_of(DocuSignClient)
 	end
 
