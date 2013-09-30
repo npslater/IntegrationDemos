@@ -45,6 +45,33 @@ describe DocuSignClient do |variable|
         }
     }
 
+    let(:signers) {
+    	[
+	    	{
+	    		:email => AppConfig.docusign["recipientEmail"],
+	    		:userName => AppConfig.docusign["recipientName"],
+	    		:recipientId => 1,
+	    		:tabs =>  [
+	    			{
+		    			:xPosition => "100",
+		    			:yPosition => "100",
+		    			:documentId => "1",
+		    			:pageNumber => "1"
+	    			}
+	    		]
+	    	}
+    	]
+    }
+
+    let(:docs) {
+    	[
+    		{
+    			:name => "DocumentToSign",
+    			:documentId => "1"
+    		}
+    	]
+    }
+
 	it "should have a constructor that takes a hash of credentials and returns an instance" do
 		#puts "config: #{AppConfig.docusign}"
 		client.should be_an_instance_of(DocuSignClient)
@@ -70,5 +97,9 @@ describe DocuSignClient do |variable|
 
 	it "should return a URL to the recipient view for the envelope Id returned from envelope creation" do
 		client.recipientViewUrl(baseUrl, envelopeId, returnUrl, recipientInfo).should_not be_nil
+	end
+
+	it "should send a document for signature request" do
+		client.requestDocumentSignature(baseUrl, "email subject", signers, docs)
 	end
 end

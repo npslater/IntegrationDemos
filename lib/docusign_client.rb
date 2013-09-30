@@ -45,6 +45,43 @@ class DocuSignClient
                 })
         end
 
+        def createDocumentSignaturePayload(emailSubject, signers, documents)
+            body = {
+                :recipients => {
+                    :signers => []
+                },
+                :documents => [],
+                :status => 'sent',
+                :emailSubject => emailSubject
+            }
+            signers.each do | signer |
+                s = {
+                        :email => signer[:email],
+                        :name => signer[:name],
+                        :recipientId => signer[:recipientId],
+                        :tabs => {
+                            :signHereTabs => []
+                    }
+                }
+                signer[:tabs].each do | tab |
+                    s[:tabs][:signHereTabs].push({
+                            :xPosition => tab[:xPosition],
+                            :yPosition => tab[:yPosition],
+                            :documentId => tab[:documentId],
+                            :pageNumber => tab[:pageNumber]
+                        })
+                end
+                body[:recipients][:signers].push(s)
+            end
+            documents.each do | doc |
+                body[:documents].push({
+                        :name => doc[:name],
+                        :documentId => doc[:documentId]
+                    })
+            end
+            JSON.generate(body)
+        end
+
     public
 
         def login(url)
@@ -76,5 +113,21 @@ class DocuSignClient
                     raise "HTTP Error: #{response.code}"
                 end
             end 
+        end
+
+        def requestDocumentSignature(baseUrl, emailSubject, signers = [], documents = [])
+            body = createDocumentSignaturePayload(emailSubject, signers, documents)
+            payload = 
+                {
+                        :body => "test",
+                        :file => File.new("/Users/nslater/src/ruby/DocuSign/rails/IntegrationDemos/README.rdoc", "rb")
+                }
+            
+                
+            
+            RestClient.log = "stdout"
+            RestClient.post("#{baseUrl}/envelopes", payload, headers) do | response, request, result |
+                puts "response: #{response.body}"
+            end
         end
 end

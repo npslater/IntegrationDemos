@@ -1,0 +1,10 @@
+<%= form_tag({action: :upload}, multipart: true) do %>
+    <div class="control-group">
+        <%= file_field_tag 'document' %>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+          <button type="submit" class="btn">Upload and Request Signature</button>
+        </div>
+    </div>
+<% end %>
