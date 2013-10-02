@@ -11,13 +11,19 @@ describe DocuSignClient do |variable|
 		DocuSignClient.new(credentials).login(loginUrl)["loginAccounts"][0]["baseUrl"]
 	}
 
-	let(:roles) {
+	let(:signers) {
 		[
 			{
 				:email => AppConfig.docusign["recipientEmail"],
 				:name => AppConfig.docusign["recipientName"],
-				:roleName => AppConfig.docusign["templateRoleName"],
-				:clientUserId => '1001'
+				:role => AppConfig.docusign["templateRoleName"],
+        :tabs => [
+            {
+                :xPosition => 100,
+                :yPosition => 100,
+                :pageNumber => 1
+            }
+        ]
 			}
 		]
 	}
@@ -32,45 +38,19 @@ describe DocuSignClient do |variable|
 	}
 
 	let(:envelopeId) {
-		client.createEnvelope(baseUrl, templateId, emailOpts, roles)["envelopeId"]
+		client.createEnvelope(baseUrl, templateId, emailOpts, signers)["envelopeId"]
 	}
 
 	let(:returnUrl) { "http://localhost:3000/docusign/finish" }
 
-    let(:recipientInfo) {
+  let(:docs) {
+    [
         {
-            :email => AppConfig.docusign["recipientEmail"],
-            :userName => AppConfig.docusign["recipientName"],
-            :clientUserId => '1001'
+            :path => File.expand_path('./Test.txt',  File.dirname(__FILE__)),
+            :content_type => 'text/plain'
         }
-    }
-
-    let(:signers) {
-    	[
-	    	{
-	    		:email => AppConfig.docusign["recipientEmail"],
-	    		:userName => AppConfig.docusign["recipientName"],
-	    		:recipientId => 1,
-	    		:tabs =>  [
-	    			{
-		    			:xPosition => "100",
-		    			:yPosition => "100",
-		    			:documentId => "1",
-		    			:pageNumber => "1"
-	    			}
-	    		]
-	    	}
-    	]
-    }
-
-    let(:docs) {
-    	[
-    		{
-    			:name => "DocumentToSign",
-    			:documentId => "1"
-    		}
-    	]
-    }
+    ]
+  }
 
 	it "should have a constructor that takes a hash of credentials and returns an instance" do
 		puts "config: #{AppConfig.docusign}"
@@ -87,11 +67,11 @@ describe DocuSignClient do |variable|
 	end
 
 	it "should return a hash on successful envelope creation" do
-		client.createEnvelope(baseUrl, templateId, emailOpts, roles).should be_an_instance_of(Hash)
+		client.createEnvelope(baseUrl, templateId, emailOpts, signers).should be_an_instance_of(Hash)
 	end
 
 	it "should have a envelopeId property in the hash returned from successful envelope creation" do
-		envelopeId = client.createEnvelope(baseUrl, templateId, emailOpts, roles)["envelopeId"]
+		envelopeId = client.createEnvelope(baseUrl, templateId, emailOpts, signers)["envelopeId"]
 		envelopeId.should_not be_nil
 	end
 

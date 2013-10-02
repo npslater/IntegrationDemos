@@ -1,5 +1,6 @@
 require 'json'
 require 'rest-client'
+require 'net/http/post/multipart'
 
 class DocuSignClient
 
@@ -20,32 +21,59 @@ class DocuSignClient
             {"X-Docusign-Authentication" => authHeader, "content-type" => "application/json", "accept" => "application/json"}
         end
 
-        def createEnvelopeRequestBody(templateId, emailOpts, recipientRoles)
+        def headers_multipart
+          {"X-Docusign-Authentication" => authHeader, "content-type" => "multipart/form-data"}
+        end
+
+        def initialize_net_http_ssl(uri)
+          http = Net::HTTP.new(uri.host, uri.port)
+          http.use_ssl = true
+
+          # Explicitly verifies that the certificate matches the domain. Requires
+          # that we use www when calling the production DocuSign API
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+          http
+        end
+
+        def init_multipart_post_request(uri, payload)
+          request = Net::HTTP::Post::Multipart.new(uri.request_uri, payload, headers)
+          request.body = request.body_stream.read
+          puts request.body
+          request
+        end
+
+        def createEnvelopeRequestBody(templateId, emailOpts, signers)
             
             roles = []
-            recipientRoles.each do |role|
-                roles.push({"email" => role[:recipientEmail],"name" => role[:recipientName],"roleName" => role[:templateRoleName],"clientUserId" => role[:clientUserId]})
+            signers.each do |signer|
+                roles.push({"email" => signer[:email],"name" => signer[:name],"roleName" => signer[:role],"clientUserId" => signer[:email]})
             end
             JSON.generate({
                 "emailSubject" => emailOpts[:emailSubject],
                 "emailBlurb" => emailOpts[:emailBlurb],
                 "templateId" => templateId,
-                "templateRoles" => recipientRoles,
+                "templateRoles" => roles,
                 "status" => "sent"
             })
         end
 
-        def createRecipientViewRequestBody(returnUrl, recipientInfo)
+        def createRecipientViewRequestBody(returnUrl, signer)
             JSON.generate({
                 "returnUrl" => returnUrl,
                 "authenticationMethod" => "email",
-                "email" => recipientInfo[:email],
-                "userName" => recipientInfo[:userName],
-                "clientUserId" => recipientInfo[:clientUserId]
+                "email" => signer[:email],
+                "userName" => signer[:name],
+                "clientUserId" => signer[:email]
                 })
         end
 
-        def createDocumentSignaturePayload(emailSubject, signers, documents)
+        def create_document_signature_payload(emailSubject, signers, documents)
+          { :body => UploadIO.new(StringIO.new(JSON.generate(createDocumentSignatureBody(emailSubject, signers, documents))), "application/json", "body.json", "Content-Disposition" => "form-data")}.merge!(create_upload_ios(documents))
+          #{:body => JSON.generate(createDocumentSignatureBody(emailSubject, signers, documents))}.merge!(create_upload_ios(documents))
+        end
+
+        def createDocumentSignatureBody(emailSubject, signers, documents)
             body = {
                 :recipients => {
                     :signers => []
@@ -54,11 +82,11 @@ class DocuSignClient
                 :status => 'sent',
                 :emailSubject => emailSubject
             }
-            signers.each do | signer |
+            signers.each_with_index do | signer, index|
                 s = {
                         :email => signer[:email],
                         :name => signer[:name],
-                        :recipientId => signer[:recipientId],
+                        :recipientId => "#{index+1}",
                         :tabs => {
                             :signHereTabs => []
                     }
@@ -67,19 +95,27 @@ class DocuSignClient
                     s[:tabs][:signHereTabs].push({
                             :xPosition => tab[:xPosition],
                             :yPosition => tab[:yPosition],
-                            :documentId => tab[:documentId],
+                            :documentId => tab[:documentIndex] ? tab[:documentIndex] + 1 : 1,
                             :pageNumber => tab[:pageNumber]
                         })
                 end
                 body[:recipients][:signers].push(s)
             end
-            documents.each do | doc |
+            documents.each_with_index do | doc, index|
                 body[:documents].push({
-                        :name => doc[:name],
-                        :documentId => doc[:documentId]
+                        :name => File.basename(doc[:path]),
+                        :documentId => "#{index+1}"
                     })
             end
-            JSON.generate(body)
+            body
+        end
+
+        def create_upload_ios(documents)
+          ios = {}
+          documents.each_with_index do | doc, index |
+            ios.merge!({ "file#{index+1}" => UploadIO.new(doc[:path], doc[:content_type], File.basename(doc[:path]),"Content-Disposition" => "file; documentId=#{index+1}")})
+          end
+          ios
         end
 
     public
@@ -94,8 +130,8 @@ class DocuSignClient
             end 
         end
 
-        def createEnvelope(baseUrl, templateId, emailOpts = {}, recipientRoles=[])
-            RestClient.post("#{baseUrl}/envelopes", createEnvelopeRequestBody(templateId, emailOpts, recipientRoles), headers) do |response, request, result|
+        def createEnvelope(baseUrl, templateId, emailOpts = {}, signers=[])
+            RestClient.post("#{baseUrl}/envelopes", createEnvelopeRequestBody(templateId, emailOpts, signers), headers) do |response, request, result|
                 if response.code == 201
                     return JSON.parse(response.body)
                 else
@@ -104,8 +140,8 @@ class DocuSignClient
             end
         end
 
-        def recipientViewUrl(baseUrl, envelopeId, returnUrl, recipientInfo = {})
-            RestClient.post("#{baseUrl}/envelopes/#{envelopeId}/views/recipient", createRecipientViewRequestBody(returnUrl, recipientInfo), headers) do |response, request, result|
+        def recipientViewUrl(baseUrl, envelopeId, returnUrl, signer = {})
+            RestClient.post("#{baseUrl}/envelopes/#{envelopeId}/views/recipient", createRecipientViewRequestBody(returnUrl, signer), headers) do |response, request, result|
                 if response.code == 201
                     return JSON.parse(response.body)
                 else
@@ -116,18 +152,12 @@ class DocuSignClient
         end
 
         def requestDocumentSignature(baseUrl, emailSubject, signers = [], documents = [])
-            body = createDocumentSignaturePayload(emailSubject, signers, documents)
-            payload = 
-                {
-                        :body => "test",
-                        :file => File.new("/Users/nslater/src/ruby/DocuSign/rails/IntegrationDemos/README.rdoc", "rb")
-                }
-            
-                
-            
-            RestClient.log = "stdout"
-            RestClient.post("#{baseUrl}/envelopes", payload, headers) do | response, request, result |
-                puts "response: #{response.body}"
-            end
+            uri = URI.parse("#{baseUrl}/envelopes")
+            http = initialize_net_http_ssl(uri)
+            payload = create_document_signature_payload(emailSubject, signers, documents)
+            puts payload
+            request = init_multipart_post_request(uri, payload)
+            response = http.request(request)
+            puts response.body
         end
 end
