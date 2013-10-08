@@ -8,6 +8,7 @@ DocuSignDemo::Application.routes.draw do
   match 'demos/docusign/document-request/upload', :to => 'document_sign_request#upload'
 
   get '/static_pages/index'
+  get '/oauth/google/redirect', :to => 'o_auth#redirect_google'
 
 
 

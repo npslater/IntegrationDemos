@@ -6,6 +6,7 @@ gem 'bootstrap-sass', '2.0.0'
 gem 'rest-client', '>=1.6.7'
 gem 'sqlite3', '1.3.5'
 gem 'multipart-post'
+gem 'google-api-client'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'

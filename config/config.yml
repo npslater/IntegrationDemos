@@ -9,6 +9,10 @@ common: &default
         templateRoleName: Approver
         recipientName: John Smith
         recipientEmail: jsmith@smith.com
+    google:
+        client_id: <%=ENV['GOOGLE_CLIENT_ID']%>
+        client_secret: <%=ENV['GOOGLE_CLIENT_SECRET']%>
+        redirect_url: https://demos.slaterwest.com/oauth2/google
 
 development:
     <<: *default
